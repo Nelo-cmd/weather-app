@@ -76,6 +76,9 @@ function App() {
   }
   return (
     <>
+      <div className="app-div">
+        <h2>GetWeather</h2>
+      </div>
       <div className="input_div">
         <input
           id="user_city"
@@ -85,37 +88,40 @@ function App() {
         />
         <button onClick={() => SetSubmittedCity(city)}>Set</button>
       </div>
-      <div className="box1">
-        <h2>
-          Right now in {WeatherData.name}
-          {WeatherData.sys && WeatherData.sys.country
-            ? `, ${WeatherData.sys.country}`
-            : ""}
-          ,
-        </h2>
-        <h2>
-          {new Date(
-            (WeatherData.dt + WeatherData.timezone) * 1000
-          ).toLocaleString("en-UK", {
-            timeZone: "UTC",
-            year: "numeric",
-            month: "long",
-            weekday: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          })}
-        </h2>
-      </div>
-      <div className="doublebox">
+      <section className="section-1">
+        <div className="box1">
+          <h2 className="location">
+            Right now in {WeatherData.name}
+            {WeatherData.sys && WeatherData.sys.country
+              ? `, ${WeatherData.sys.country}`
+              : ""}
+            ,
+          </h2>
+          <h2 className="datetime">
+            {new Date(
+              (WeatherData.dt + WeatherData.timezone) * 1000
+            ).toLocaleString("en-UK", {
+              timeZone: "UTC",
+              year: "numeric",
+              month: "long",
+              weekday: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })}
+          </h2>
+        </div>
         <div className="box2">
           <img
             src={`https://openweathermap.org/img/wn/${WeatherData.weather[0].icon}@2x.png`}
             alt="weather-icon"
+            className="weather-icon"
           />
-          <div>
-            <h3>
+        </div>
+        <div className="doublebox">
+          <div className="box3">
+            <h3 className="temp">
               {(WeatherData.main.temp - 273.15).toFixed(0)}
               °C
             </h3>
@@ -123,25 +129,23 @@ function App() {
               Feels like {(WeatherData.main.feels_like - 273.15).toFixed(0)}°C
             </h3>
           </div>
+          <div className="box3-5">
+            <h5 className="clear">{WeatherData.weather[0].main}</h5>
+            <h4>{WeatherData.weather[0].description}</h4>
+          </div>
         </div>
-
-        <div className="box3">
-          <h4>{WeatherData.weather[0].main}</h4>
-          <h4>Description</h4>
-          <h4>{WeatherData.weather[0].description}</h4>
+        <div className="box4">
+          <img src={wind} alt="wind icon"></img>
+          <div>
+            <h4>
+              deg: {WeatherData.wind.deg}° <br></br>
+              gust: {WeatherData.wind.gust}m/s
+              <br></br>
+              speed: {WeatherData.wind.speed}m/s
+            </h4>
+          </div>
         </div>
-      </div>
-      <div className="box4">
-        <img src={wind} alt="wind icon"></img>
-        <div>
-          <h4>
-            deg : {WeatherData.wind.deg}° <br></br>
-            gust : {WeatherData.wind.gust}m/s
-            <br></br>
-            speed :{WeatherData.wind.speed}m/s
-          </h4>
-        </div>
-      </div>
+      </section>
     </>
   );
 }
