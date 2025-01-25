@@ -152,3 +152,25 @@ body {
 .box4 h4 {
   color: rgb(100, 100, 100);
 }
+
+@media only screen and (min-width: 600px) and (max-width: 1200px) {
+  .section-1 {
+    height: 50%;
+    width: 50%;
+  }
+}
+
+@media only screen and (min-width: 800px) and (max-width: 1250px) {
+  .section-1 {
+    height: 40%;
+    width: 40%;
+  }
+}
+
+@media only screen and (min-width: 1250px) and (max-width: 1600px) {
+  .section-1 {
+    height: 35%;
+    width: 35%;
+    margin-bottom: 20px;
+  }
+}
