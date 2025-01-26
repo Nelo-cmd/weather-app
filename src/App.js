@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import wind from "./images/winds-weather-symbol.png";
+import { Puff } from "react-loader-spinner";
 import "./App.css";
 
 function App() {
-  const [city, setCity] = useState("");
-  const [SubmittedCity, SetSubmittedCity] = useState("");
-  const [WeatherData, SetWeatherData] = useState(null);
-  const [WeatherMain, SetWeatherMain] = useState("Clear");
+  const [city, setCity] = useState(""); //state tracking for the city input
+  const [SubmittedCity, SetSubmittedCity] = useState(""); //state trackin for the submitted city
+  const [WeatherData, SetWeatherData] = useState(null); //state tracking for the weather data
+  const [WeatherMain, SetWeatherMain] = useState("Clear"); //state tracking for the weather
+  const [IsLoading, SetIsLoading] = useState(false); //state tracking for data loading
+  const [UserMessage, SetUserMessage] = useState("");
 
+  //side effect for changing background image on change in weather
   useEffect(() => {
     const backgroundStyles = {
       Clear: "linear-gradient(to right, #87CEEB, #FFD700)", // Clear skies
@@ -32,9 +36,43 @@ function App() {
     document.body.style.transition = "background 0.5s ease-in-out";
   }, [WeatherMain]);
 
+  //side effect for setting app name
   useEffect(() => {
     document.title = "Weather App";
   });
+
+  //function for setting submitted city, and changing loading boolean
+  const startSearch = () => {
+    if (!city) {
+      SetUserMessage("You need to input a city.");
+    }
+    SetSubmittedCity(city);
+    SetIsLoading(true);
+  };
+
+  //loader function
+  const loader = () => {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Puff
+          color="grey"
+          height={"120px"}
+          width={"120px"}
+          ariaLabel="puff-loading"
+        />
+      </div>
+    );
+  };
+
+  //side effect for getting weather data, and assigning it to its state
   useEffect(() => {
     const fetchWeatherData = async () => {
       if (!SubmittedCity) {
@@ -49,19 +87,25 @@ function App() {
         }
         const data = await response.json();
         console.log(data);
+        SetIsLoading(false);
         SetWeatherData(data);
         SetWeatherMain(data.weather[0]?.main || "Clear");
       } catch (error) {
-        console.error("error fetching weather data:", error.message);
+        SetWeatherData(null);
+        SetUserMessage("error fetching weather data:", error.message);
+        SetIsLoading(false);
       }
     };
     fetchWeatherData();
   }, [SubmittedCity]);
-  if (!WeatherData) {
-    return (
-      <div className="app-div">
-        <h2>GetWeather</h2>
 
+  //return value
+  if (!SubmittedCity) {
+    return (
+      <>
+        <div className="app-div">
+          <h2>GetWeather</h2>
+        </div>
         <div className="input_div">
           <input
             id="user_city"
@@ -69,11 +113,13 @@ function App() {
             value={city}
             onChange={(event) => setCity(event.currentTarget.value)}
           />
-          <button onClick={() => SetSubmittedCity(city)}>Set</button>
+          <button onClick={startSearch}>Set</button>
         </div>
-      </div>
+        {UserMessage ? <div className="errormessage">{UserMessage}</div> : ""}
+      </>
     );
   }
+
   return (
     <>
       <div className="app-div">
@@ -86,66 +132,72 @@ function App() {
           value={city}
           onChange={(event) => setCity(event.currentTarget.value)}
         />
-        <button onClick={() => SetSubmittedCity(city)}>Set</button>
+        <button onClick={startSearch}>Set</button>
       </div>
-      <section className="section-1">
-        <div className="box1">
-          <h2 className="location">
-            Right now in {WeatherData.name}
-            {WeatherData.sys && WeatherData.sys.country
-              ? `, ${WeatherData.sys.country}`
-              : ""}
-            ,
-          </h2>
-          <h2 className="datetime">
-            {new Date(
-              (WeatherData.dt + WeatherData.timezone) * 1000
-            ).toLocaleString("en-UK", {
-              timeZone: "UTC",
-              year: "numeric",
-              month: "long",
-              weekday: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })}
-          </h2>
-        </div>
-        <div className="box2">
-          <img
-            src={`https://openweathermap.org/img/wn/${WeatherData.weather[0].icon}@2x.png`}
-            alt="weather-icon"
-            className="weather-icon"
-          />
-        </div>
-        <div className="doublebox">
-          <div className="box3">
-            <h3 className="temp">
-              {(WeatherData.main.temp - 273.15).toFixed(0)}
-              °C
-            </h3>
-            <h3>
-              Feels like {(WeatherData.main.feels_like - 273.15).toFixed(0)}°C
-            </h3>
+      {IsLoading ? (
+        <div className="loading">{loader()}</div>
+      ) : !WeatherData ? (
+        <div className="errormessage">{UserMessage}</div>
+      ) : (
+        <section className="section-1">
+          <div className="box1">
+            <h2 className="location">
+              Right now in {WeatherData.name}
+              {WeatherData.sys && WeatherData.sys.country
+                ? `, ${WeatherData.sys.country}`
+                : ""}
+              ,
+            </h2>
+            <h2 className="datetime">
+              {new Date(
+                (WeatherData.dt + WeatherData.timezone) * 1000
+              ).toLocaleString("en-UK", {
+                timeZone: "UTC",
+                year: "numeric",
+                month: "long",
+                weekday: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })}
+            </h2>
           </div>
-          <div className="box3-5">
-            <h5 className="clear">{WeatherData.weather[0].main}</h5>
-            <h4>{WeatherData.weather[0].description}</h4>
+          <div className="box2">
+            <img
+              src={`https://openweathermap.org/img/wn/${WeatherData.weather[0].icon}@2x.png`}
+              alt="weather-icon"
+              className="weather-icon"
+            />
           </div>
-        </div>
-        <div className="box4">
-          <img src={wind} alt="wind icon"></img>
-          <div>
-            <h4>
-              deg: {WeatherData.wind.deg}° <br></br>
-              gust: {WeatherData.wind.gust}m/s
-              <br></br>
-              speed: {WeatherData.wind.speed}m/s
-            </h4>
+          <div className="doublebox">
+            <div className="box3">
+              <h3 className="temp">
+                {(WeatherData.main.temp - 273.15).toFixed(0)}
+                °C
+              </h3>
+              <h3>
+                Feels like {(WeatherData.main.feels_like - 273.15).toFixed(0)}°C
+              </h3>
+            </div>
+            <div className="box3-5">
+              <h5 className="clear">{WeatherData.weather[0].main}</h5>
+              <h4>{WeatherData.weather[0].description}</h4>
+            </div>
           </div>
-        </div>
-      </section>
+          <div className="box4">
+            <img src={wind} alt="wind icon"></img>
+            <div>
+              <h4>
+                deg: {WeatherData.wind.deg}° <br></br>
+                gust: {WeatherData.wind.gust}m/s
+                <br></br>
+                speed: {WeatherData.wind.speed}m/s
+              </h4>
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }
